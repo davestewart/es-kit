@@ -2,11 +2,16 @@
 
 > ES Kit is a "pick and mix" utility library that simplifies writing Elasticsearch code
 
+<p align="center">
+  <img src="docs/assets/es-kit.svg" alt="ES Kit logo">
+</p>
+
+
 ## Abstract
 
-Elasticsearch's [JavaScript Client](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/introduction.html) provides a powerful way to call its [APIs](https://www.elastic.co/guide/en/elasticsearch/reference/current/rest-apis.html) but its inherent flexibility and subtle but significant nuances can quickly result in verbose, duplicated and fragile code, whilst modeling even the most basic database setup.
+Elasticsearch's [JavaScript Client](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/introduction.html) provides a powerful way to call Elasticsearch [APIs](https://www.elastic.co/guide/en/elasticsearch/reference/current/rest-apis.html) but its inherent flexibility can lead to verbosity, duplication and fragility whilst modeling even the most basic database setups.
 
-To address this, ES Kit provides a "kit of parts" in the form of simple, reusable and atomic utility functions, which fit together to reliably abstract the request / response lifecycle and make it easy to write simple, clean code and eliminate the trial and error.
+To address this, ES Kit provides a "kit of parts" in the form of reusable, atomic utility functions which fit together to reliably abstract the request / response lifecycle, making it easy to write clean, trial-and-error-free code.
 
 ## Who is this library for?
 
@@ -14,9 +19,9 @@ Whilst primarily aimed at **simplifing Elasticsearch for new users**, ES Kit aim
 
 - **New users**: use the query functions and Api to get up and running quickly
 - **Improving users**: use the docs, query functions and helpers to learn how Elasticsearch fits together
-- **Experienced users**: customise the core helpers to build requests and parse responses whilst keeping your code clean
+- **Experienced users**: customise the core helpers to build requests and parse responses in less overall code
 
-New users, check the [Elasticsearch 101](docs/elastic-101.md) document for a valuable primer on how ES works differently to how you might expect, and how to work with the database, vs against it.
+New users, check the [Elasticsearch 101](docs/elastic-101.md) document for a valuable primer on how ES works differently to how you might expect, and how to work with the database vs against it.
 
 ## Overview
 
@@ -27,7 +32,7 @@ The library comprises the following parts:
 | [Queries](./docs/queries.md) | Build Elastic queries using simple functions             | `_multiMatch('*', 'cat')`         |
 | [Scripts](./docs/scripts.md) | Build Elastic scripts from existing JavaScript functions | `_removeFromArray('listIds', 24)` |
 | [Helpers](./docs/helpers.md) | Abstract any part of the Elastic query lifecycle         | `$paginate(res)`                  |
-| [Api](./docs/api.md)         | One-liner interaction Elastic's Search and Document APIs | `Api.search('contacts', params)`  |
+| [Api](./docs/api.md)         | One-liner interaction with Search and Document APIs      | `Api.search('contacts', params)`  |
 
 The key takeaway is that you can use as little or as much of ES Kit as required; the level of abstraction is up to you!
 
