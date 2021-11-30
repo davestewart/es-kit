@@ -1,0 +1,41 @@
+{
+  "body": {
+    "took" : 0,
+    "timed_out" : false,
+    "_shards" : {
+      "total" : 1,
+      "successful" : 1,
+      "skipped" : 0,
+      "failed" : 0
+    },
+    "hits" : {
+      "total" : {
+        "value" : 4,
+        "relation" : "eq"
+      },
+      "max_score" : 1.0,
+      "hits" : [
+        {
+          "_index" : "contacts",
+          "_type" : "_doc",
+          "_id" : "ZRWBNH0Bk8QNffIJQWQp",
+          "_score" : 1.0,
+          "_source" : {
+            "name" : "Contact 1",
+            "phone" : "020 0000 0000"
+          }
+        },
+        {
+          "_index" : "contacts",
+          "_type" : "_doc",
+          "_id" : "lCloSH0Bs3kx_70FRmtW",
+          "_score" : 1.0,
+          "_source" : {
+            "name" : "Contact 2",
+            "phone" : "020 1111 1111"
+          }
+        }
+      ]
+    }
+  }
+}
