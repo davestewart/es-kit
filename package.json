@@ -1,9 +1,28 @@
 {
   "name": "@davestewart/es-kit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A pick-and-mix utility library that simplifies writing Elasticsearch code",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davestewart/es-kit.git"
+  },
+  "author": "Dave Stewart",
+  "license": "MIT",
+  "homepage": "https://github.com/davestewart/es-kit#readme",
+  "bugs": {
+    "url": "https://github.com/davestewart/es-kit/issues"
+  },
+  "keywords": [
+    "elastic",
+    "elasticsearch",
+    "utility",
+    "dx"
+  ],
   "scripts": {
     "test": "jest ./tests --verbose",
     "lint": "eslint src/** --ext .js --ext .ts",
@@ -14,21 +33,6 @@
     "build:watch": "npm run build -- --watch",
     "prepare": "npm run build:clean && npm run build && npm run build:types"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/davestewart/es-kit.git"
-  },
-  "keywords": [
-    "elasticsearch",
-    "utility",
-    "dx"
-  ],
-  "author": "Dave Stewart",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/davestewart/es-kit/issues"
-  },
-  "homepage": "https://github.com/davestewart/es-kit#readme",
   "dependencies": {
     "@types/elasticsearch": "^5.0.40",
     "semi": "^4.0.5"
