@@ -230,6 +230,10 @@ export function $paginate (res: any, options: SearchOptions) {
   }
 }
 
+export function $doc (hit: any, source: any = {}) {
+  return { _id: hit._id, ...source }
+}
+
 // ---------------------------------------------------------------------------------------------------------------------
 // extract results
 // ---------------------------------------------------------------------------------------------------------------------
@@ -265,7 +269,7 @@ export function $extract (res: any, req: any) {
  */
 export function $extractSearch (res: any, options: SearchOptions) {
   return (res.body || res).hits.hits.map((hit: any) => {
-    const doc = { _id: hit._id, ...hit._source }
+    const doc = $doc(hit, hit._source)
     return options._fields
       ? $fields(doc, options._fields)
       : doc
@@ -273,32 +277,21 @@ export function $extractSearch (res: any, options: SearchOptions) {
 }
 
 export function $extractCreate (res: any, body: any = {}) {
-  const _id = res.body._id
-  return {
-    _id,
-    ...body
-  }
+  return $doc(res.body, body)
 }
 
 export function $extractUpdate (res: any, doc = {}) {
-  const _id = res.body._id
   const result = res.body.result
   if (result === 'updated') {
-    return {
-      _id,
-      ...doc
-    }
+    return $doc(res.body, doc)
   }
   return {}
 }
 
 export function $extractDelete (res: any) {
-  const _id = res.body._id
   const result = res.body.result
   if (result === 'deleted') {
-    return {
-      _id,
-    }
+    return $doc(res.body)
   }
   return {}
 }
@@ -317,8 +310,10 @@ export default {
   options: $options,
 
   // response
-  fields: $fields,
   paginate: $paginate,
+  extract: $extract,
+  fields: $fields,
+  doc: $doc,
 
   // results
   extractSearch: $extractSearch,
