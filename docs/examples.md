@@ -1,10 +1,24 @@
 # Examples
 
-Without ES Blocks:
+## Setup
+
+Set up ES JS Client:
+
+```js
+// client.js
+import { Client } from '@elastic/elasticsearch'
+
+export const client = new Client({
+  node: 'http://localhost:9200'
+})
+```
+
+## Without ES Kit
+
+To start with, let's write some ES queries using only the ES JS client:
 
 ```js
 import { client } from './client'
-import _ from './queries.js'
 
 // query is verbose with difficult to remember syntax
 const params = {
@@ -33,18 +47,24 @@ const params = {
 
 try {
   const res = await client.search(params)
-  console.log(res.body.hits.hits)
+  if (res.body.hits) {
+	  return res.body.hits.hits.map(hit => {
+      return { _id: hit._id, ...hit._source }
+    })    
+  }
 }
 catch (err) {
   console.log(err)
 }
 ```
 
-Light use; working with the Elasticsearch client to simplify requests:
+## Building query options
+
+Now, let's bring in ES Kit's [query](./utilities/queries.md) functions to simplify the building of queries:
 
 ```js
 import { client } from './client'
-import _ from 'es-kit/queries'
+import { Queries as _ } from '@davestewart/es-kit'
 
 // use blocks to build the query
 const params = {
@@ -57,19 +77,24 @@ const params = {
 
 try {
   const res = await client.search(params)
-  console.log(res.body.hits.hits)
+  if (res.body.hits) {
+	  return res.body.hits.hits.map(hit => {
+      return { _id: hit._id, ...hit._source }
+    })    
+  }
 }
 catch (err) {
   console.log(err)
 }
 ```
 
-Medium use; using additional utility libraries to simplify responses:
+## Handling API responses
+
+Next, let's use ES Kit's [results](utilities/helpers.md) and [error](utilities/helpers.md) helpers to parse results and handle errors, without writing manual code:
 
 ```js
 import { client } from './client'
-import _ from 'es-kit/queries'
-import $ from 'es-kit/helpers'
+import { Queries as _, Helpers as $ } from '@davestewart/es-kit'
 
 const params = {
   index: 'contacts',
@@ -80,19 +105,20 @@ const params = {
 }
 try {
   const res = await client.search(params)
-  console.log($.extractSearch(res))
+  return $.results(res)
 }
 catch (err) {
-  $.error(err)
+  return $.error(err)
 }
 ```
 
-Full use; using the API wrappers minimise typed code:
+## Putting it all together
+
+Finally, lets use ES Kit's [API](./api) to make the call, parse responses, handle errors and remap fields (note: internally it uses all the available helpers!):
 
 ```js
 import { client } from './client'
-import _ from 'es-kit/queries'
-import Api from 'es-kit/api'
+import { Queries as _, Api } from '@davestewart/es-kit'
 
 const params = {
   query: _.should([
@@ -105,6 +131,9 @@ const options = {
 }
 
 // makes the call
-Api.search('contacts', params, options)
+return Api.search('contacts', params, options)
 ```
 
+## Next
+
+Return to the [docs](README.md).

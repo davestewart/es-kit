@@ -28,15 +28,15 @@ Whilst primarily aimed at [simplifing Elasticsearch for new users](docs/elastic/
 
 > **New users**: check the [Elasticsearch 101](docs/elastic/101.md) document for a valuable primer on how ES works differently to how you might expect and the [Elasticsearch tips](docs/elastic/tips.md) document on how to work *with* Elastic vs *against* it.
 
-## Overview
+## The kit
 
 ES Kit comprises the following components:
 
 | Type                         | Purpose                                                      | Code example                      |
 | ---------------------------- | ------------------------------------------------------------ | --------------------------------- |
 | [Queries](docs/utilities/queries.md) | Build Elastic queries using simple functions                 | `_multiMatch('*', 'cat')`         |
-| [Scripts](docs/utilities/scripts.md) | Build Elastic scripts from JavaScript functions     | `_removeFromArray('listIds', 24)` |
 | [Helpers](docs/utilities/helpers.md) | Abstract key parts of the Elastic API lifecycle | `$paginate(res)`                  |
+| [Scripts](docs/utilities/scripts.md) | Build Elastic scripts from JavaScript functions     | `_removeFromArray('listIds', 24)` |
 | [Api](docs/api/README.md)         | Simplified interaction with Elasticsearch's APIs | `Api.search('contacts', params)`  |
 
 Each of the helpers, functions or classes aims to be simple, atomic and [transparent](src/modules); rather than a complex or overly-abstracted monolithic framework, these small self-contained units let you go all-in on abstraction or pick and mix what suits your development style or project.
