@@ -36,7 +36,7 @@ export async function __search (index: string, query: Query, options: SearchOpti
     const res = await config.client.search(params)
     return 'from' in options
       ? $.paginate(res, options)
-      : $.extractSearch(res, options)
+      : $.extract.search(res, options)
   }
   catch (err) {
     throw $.error(err)
@@ -59,7 +59,7 @@ export async function __multiSearch (index: string, queries: Query[], options: S
   // build parameters
   const { _fields, ...opts } = options
   const params = {
-    body: $.bulk(index, queries, opts)
+    body: $.bulk.search(index, queries, opts)
   }
 
   // search
@@ -68,7 +68,7 @@ export async function __multiSearch (index: string, queries: Query[], options: S
     const res = await config.client.msearch(params) // ?
     if (res.responses) {
       return res.responses.map((res: any) => {
-        return $.extractSearch(res, options)
+        return $.extract.search(res, options)
       })
     }
     return []
@@ -91,7 +91,7 @@ export async function __create (index: string, body: any, options: any = {}) {
   try {
     $.log('params', params)
     const res = await config.client.index(params)
-    return $.extractCreate(res, body)
+    return $.extract.create(res, body)
   }
   catch (err) {
     throw $.error(err)
@@ -103,21 +103,28 @@ export async function __create (index: string, body: any, options: any = {}) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 export async function __update (index: string, id: string, body: { doc?: any, script?: string }, options: any = {}) {
+  // variables
   const { doc, script } = body
   const { _id, ...source } = doc || {}
+
+  // determine doc or script update
   body = doc
     ? { doc: source }
     : { script }
+
+  // params
   const params = {
     ...options,
     index,
     body,
     id,
   }
+
+  // call
   try {
     $.log('params', params)
     const res = await config.client.update(params)
-    return $.extractUpdate(res, doc)
+    return $.extract.update(res, doc)
   }
   catch (err) {
     throw $.error(err)
@@ -136,7 +143,7 @@ export async function __delete (index: string, id: string, options: any = {}) {
   }
   try {
     const res = await config.client.delete(params)
-    return $.extractDelete(res)
+    return $.extract.delete(res)
   }
   catch (err) {
     throw $.error(err)

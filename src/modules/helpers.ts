@@ -1,21 +1,11 @@
 /* eslint-disable no-redeclare */
 // @ts-ignore
 import semi from 'semi'
-import {
-  GetResponse,
-  SearchResponse,
-  MSearchResponse,
-  DeleteDocumentResponse,
-  CreateDocumentResponse
-  RequestParams
-} from '@types/elasticsearch'
 import { BooleanQuery, Query } from '../types/queries'
 import { SearchOptions, SortOptions } from '../types/client'
 import { ElasticError } from '../classes'
 import { config } from '../config'
 import _ from './queries'
-
-const test: RequestParams.Search
 
 // ---------------------------------------------------------------------------------------------------------------------
 // request
@@ -177,11 +167,16 @@ export function $options (options: SearchOptions) {
  * Helpers to build bulk operations
  */
 export const $bulk = {
-  index (index: string, docs: any[]) {
-    return docs.flatMap(doc => [
-      { index: { _index: index } },
-      doc,
-    ])
+  index (index: string, docs: any[], idField?: string) {
+    return docs.flatMap(doc => {
+      const _id = idField
+        ? doc[idField]
+        : undefined
+      return [
+        { index: { _index: index }, _id },
+        doc,
+      ]
+    })
   },
 
   search (index: string, queries: Query[], options: SearchOptions = {}) {
@@ -278,7 +273,7 @@ export function $results (res: any, req: any, type?: string) {
  * Helpers to extract search results
  */
 export const $extract = {
-  create (res: CreateDocumentResponse, doc: Body = {}) {
+  create (res: any, doc: any = {}) {
     return $doc(res.body, doc)
   },
 
