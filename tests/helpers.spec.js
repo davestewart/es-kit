@@ -1,6 +1,4 @@
 const { Scripts, Helpers } = require('../dist')
-const res = require('./fixtures/search.res.json')
-const req = require('./fixtures/search.req.json')
 
 function test (ctx, params) {
   const target = ctx._source[params.name]
@@ -25,7 +23,7 @@ describe('scripts', function () {
       source: 'def target = ctx._source[params.name]; for (int i = target.length - 1; i >= 0; i--) { if (target[i] == params.value) { target.remove(i); } }',
       params: {
         name: 'list',
-        value: 123
+        value: 123,
       },
     }
     expect(received).toEqual(expected)
@@ -36,7 +34,7 @@ describe('scripts', function () {
     const received = Helpers.script(source)
     const expected = {
       lang: 'painless',
-      source
+      source,
     }
     expect(received).toEqual(expected)
   })
@@ -75,23 +73,124 @@ describe('sort', function () {
   })
 })
 
-describe('search', function () {
+describe('query', function () {
+  const params = {
+    name: 'dave',
+    age: 5,
+  }
+
+  const matches = [
+    { match_phrase_prefix: { name: 'dave' } },
+    { match_phrase_prefix: { age: 5 } },
+  ]
+
+  const terms = [
+    { term: { name: { value: 'dave' } } },
+    { term: { age: { value: 5 } } },
+  ]
+
+  it('should create a "must/match" query', function () {
+    const received = Helpers.query(params, { type: 'and', exact: false })
+    const expected = {
+      bool: {
+        must: matches,
+      },
+    }
+    expect(received).toEqual(expected)
+  })
+
+  it('should create a "should/match" query', function () {
+    const received = Helpers.query(params, { type: 'or', exact: false })
+    const expected = {
+      bool: {
+        should: matches,
+      },
+    }
+    expect(received).toEqual(expected)
+  })
+
+  it('should create a "must/term" query', function () {
+    const received = Helpers.query(params, { type: 'and', exact: true })
+    const expected = {
+      bool: {
+        must: terms,
+      },
+    }
+    expect(received).toEqual(expected)
+  })
+
+  it('should create a "should/term" query', function () {
+    const received = Helpers.query(params, { type: 'or', exact: true })
+    const expected = {
+      bool: {
+        should: terms,
+      },
+    }
+    expect(received).toEqual(expected)
+  })
+
+  it('should handle array fields', function () {
+    const params = {
+      name: ['dave', 'john'],
+    }
+    const received = Helpers.query(params, { type: 'and', exact: true })
+    const expected = {
+      bool: {
+        must: [
+          { term: { name: { value: 'dave' } } },
+          { term: { name: { value: 'john' } } },
+        ],
+      },
+    }
+    expect(received).toEqual(expected)
+  })
+
+  it('should handle wildcard fields', function () {
+    const params = {
+      '*': 'foo',
+    }
+    const received = Helpers.query(params, { type: 'or', exact: true })
+    const expected = {
+      multi_match: {
+        fields: ['*'],
+        query: 'foo',
+        type: 'phrase_prefix',
+      },
+    }
+    expect(received).toEqual(expected)
+  })
+
+  it('should handle wildcard values', function () {
+    const params = {
+      name: '*',
+    }
+    const received = Helpers.query(params, { type: 'or', exact: true })
+    const expected = {
+      wildcard: {
+        name: { value: '*' },
+      },
+    }
+    expect(received).toEqual(expected)
+  })
+})
+
+describe('extract', function () {
   const hits = [
     {
       _id: 'ZRWBNH0Bk8QNffIJQWQp',
       name: 'Contact 1',
-      phone: '020 0000 0000'
+      phone: '020 0000 0000',
     },
     {
       _id: 'lCloSH0Bs3kx_70FRmtW',
       name: 'Contact 2',
-      phone: '020 1111 1111'
-    }
+      phone: '020 1111 1111',
+    },
   ]
 
   it('should simplify results', function () {
     const res = require('./fixtures/search.res.json')
-    const received = Helpers.extractSearch(res, {})
+    const received = Helpers.extract.search(res, {})
     expect(received).toEqual(hits)
   })
 
@@ -103,9 +202,9 @@ describe('search', function () {
       meta: {
         from: 2,
         size: 2,
-        total: 4
+        total: 4,
       },
-      hits
+      hits,
     }
     expect(received).toEqual(expected)
   })
