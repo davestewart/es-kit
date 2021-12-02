@@ -17,5 +17,3 @@ import { _addToArray, _removeFromArray } from `@davestewart/es-kit/scripts`
 ```
 
 Each of the helpers is typed, so expect proper auto-completion and warnings as you use them.
-
-## 

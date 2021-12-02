@@ -23,11 +23,7 @@ Each of the helpers is typed, so expect proper auto-completion and warnings as y
 
 ## API
 
-- Tatch
+- Match
 - Term
 - Compound
-
-
-
-## 
 

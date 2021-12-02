@@ -1,6 +1,44 @@
 #  Helpers
 
-> Reusable helper functions to help you build request options and parse response data
+> Reusable helper functions to help you build request parameters and parse response data
+
+## Intro
+
+### Approach
+
+ES Kit works on the basis that Document and Search API calls **follow a similar lifecycle** so the helpers abstract each part:
+
+**1. Build parameters:**
+
+- build a [query](#query)
+- create a [script](#script)
+- [sort](#sort) the results
+
+**2. Make the request:**
+
+- build a [bulk query](#bulk)
+- merge any [defaults](#defaults)
+
+**3. Parse the response:**
+
+- [extract](#extract) the results
+- [paginate](#paginate) the results
+- build individual [documents](#doc)
+- remap [fields](#fields)
+
+**4. Handle errors:**
+
+- parse [errors](#error)
+- [log](#log) errors
+
+### Purpose and customisation
+
+A few notes about customisation:
+
+- the [code](../../src/modules/helpers.ts) for each of the helpers is simple and straightforward
+- The helpers are **atomic** which means you can [replace](#extending) them if you need to
+- the  [Api](../api/README.md) class uses the helpers internally; if you make any changes, they will be reflected in all API calls
+- if you don't want to get into replacing the helpers, simply use your own code where it is more suitable to
 
 ## Usage
 
@@ -38,31 +76,27 @@ Each of the helpers is typed, so expect proper auto-completion and warnings as y
 
 Note that the easiest way to see what the code does it to [look at it](https://github.com/davestewart/es-kit/blob/main/src/modules/helpers.ts).
 
-## Request helpers
+## Parameters helpers
 
 The request helpers help you build configuration to pass to the Elasticsearch client's methods.
 
+### Query
 
-### Sort
-
-The [sort()](../../src/modules/helpers.ts#) helper builds a `SortOption` array:
-
-```ts
-function $sort (
-	field: string | string[] | Record<string, string | boolean | number>,
-  keyword?: boolean
-): Record<string, SortOption>
-```
-
-Pass a string, array of strings, or object, with optional`keyword` flag:
+The [query](../../src/modules/helpers.ts#) helper is designed to convert a hash of values (such as `request.params`) into a sensible compound Elastic query.
 
 ```js
-const sort = $.sort({ name: true, age: false }, true)
+function $query (
+  fields: Record<string, any>,
+  options: { type?: 'and' | 'or', exact?: boolean } = {}
+): BooleanQuery | Query
 ```
 
-```js
-[{ 'name.keyword': 'asc' }, { 'age.keyword': 'desc' }
-```
+It handles:
+
+- and / or
+- exact / fuzzy
+- multimatch
+- wildcards
 
 ### Script
 
@@ -70,7 +104,7 @@ The [script()](../../src/modules/helpers.ts#) helper builds a `ScriptOption` con
 
 ```ts
 function $script (
-	source: string | Function,
+  source: string | Function,
   params?: object
 ): ScriptOption
 ```
@@ -114,90 +148,83 @@ It works by:
 - removing strict equality
 - concatenating into a single line
 
-### Query
+### Sort
 
-The [query](../../src/modules/helpers.ts#) helper is designed to convert a hash of values (such as `request.params`) into a sensible compound Elastic query.
+The [sort()](../../src/modules/helpers.ts#) helper builds a `SortOption` array:
 
-```js
-function $query (
-	fields: Record<string, any>,
-  options: { type?: 'and' | 'or', exact?: boolean } = {}
-): BooleanQuery | Query
+```ts
+function $sort (
+  field: string | string[] | Record<string, string | boolean | number>,
+  keyword?: boolean
+): Record<string, SortOption>
 ```
 
-It handles:
+Pass a string, array of strings, or object, with optional`keyword` flag:
 
-- and / or
-- exact / fuzzy
-- multimatch
-- wildcards
+```js
+const sort = $.sort({ name: true, age: false }, true)
+```
+
+```js
+[{ 'name.keyword': 'asc' }, { 'age.keyword': 'desc' }
+```
+
+## Request helpers
 
 ### Bulk
 
-The [bulk](../../src/modules/helpers.ts#) helper is designed to build queries for the Bulk APIs without having to revert to the redundant `flatMap`.
+The [bulk](../../src/modules/helpers.ts#) helpers are designed to build queries for the Bulk APIs without having to resort to a `flatMap`.
 
 ```ts
-function $bulk (
-	index: string, 
+function $bulk.search (
+  index: string, 
   queries: Query[],
   options: SearchOptions = {}
 ): object[]
 ```
 
-
-
-### Options
-
-The [options](../../src/modules/helpers.ts#) helper is designed to create a top level options object using defaults you supply during library initialisation.
-
 ```ts
-function $options (options: SearchOptions): SearchOptions
+function $bulk.index (
+  index: string, 
+  queries: Query[],
+  id?: string
+): object[]
 ```
 
+Rather than flattening an array which will (generally have the same `index`) you pass the `index` and the `queries` separately and the helper will interleve them for you:
 
+```js
+const values = ['foo', 'bar', 'baz']
+const queries = values.map(value => _.match('name', text))
+const bulk = $bulk.search('options', queries)
+```
+
+```
+[
+	{ index: { _index: 'options' } },
+	{ query: { match: { value: 'foo' } } },
+	{ index: { _index: 'options' } },
+	{ query: { match: { value: 'bar' } } },
+	{ index: { _index: 'options' } },
+	{ query: { match: { value: 'baz' } } },
+]
+```
+
+### Defaults
+
+The [defaults](../../src/modules/helpers.ts#) helper is designed to create a top level options object using defaults you can override.
+
+```ts
+function $defaults (options: SearchOptions): SearchOptions
+```
 
 ## Response helpers
 
 The response helpers help you simplify the verbose and somewhat inconsistent response formats from the Search and Document APIs.
 
-### Doc
+### Extract
 
-The [doc](../../src/modules/helpers.ts#) helper extracts individual hits, results or responses to a consistent format.
-
-```ts
-function $doc (
-  hit: any,
-  source: any = {}
-): object
-```
-
-
-
-### Paginate
-
-The [paginate](../../src/modules/helpers.ts#) helper paginates results in a consistent and intuitive format.
-
-```ts
-function $paginate (
-  res: any,
-  options: SearchOptions
-): { meta: object, hits: object[] }
-```
-
-
-
-### Fields
-
-The [fields](../../src/modules/helpers.ts#) helper remaps document fields to alternate structures as required.
-
-```ts
-function $fields (
-  doc: Record<string, any>, 
-  fields: Record<string, string> | Function
-): object
-```
-
-
+The [extract](../../src/modules/helpers.ts#) helper...
 
 ### Results
 
@@ -211,26 +238,40 @@ function $results (
 ): object | object[]
 ```
 
+### Paginate
 
-
-### Extract
-
-The [extract](../../src/modules/helpers.ts#) helper...
-
-## Development
-
-### Log
-
-The [log](../../src/modules/helpers.ts#) helper outputs both request and response data as the Api makes its calls.
+The [paginate](../../src/modules/helpers.ts#) helper paginates results in a consistent and intuitive format.
 
 ```ts
-function $log (
-  label: string,
-  data: any = null
-): void
+function $paginate (
+  res: any,
+  options: SearchOptions
+): { meta: object, hits: object[] }
 ```
 
+### Doc
 
+The [doc](../../src/modules/helpers.ts#) helper extracts individual hits, results or responses to a consistent format.
+
+```ts
+function $doc (
+  hit: any,
+  source: any = {}
+): object
+```
+
+### Fields
+
+The [fields](../../src/modules/helpers.ts#) helper remaps document fields to alternate structures as required.
+
+```ts
+function $fields (
+  doc: Record<string, any>, 
+  fields: Record<string, string> | Function
+): object
+```
+
+## Error helpers
 
 ### Error
 
@@ -240,7 +281,16 @@ The [error](../../src/modules/helpers.ts#L17) helper converts the various Elasti
 function $error (error: any): object
 ```
 
+## Log
 
+The [log](../../src/modules/helpers.ts#) helper outputs both request and response data as the Api makes its calls.
+
+```ts
+function $log (
+  label: string,
+  data: any = null
+): void
+```
 
 ## Extending
 

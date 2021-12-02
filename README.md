@@ -87,19 +87,19 @@ Additionally, unlike Elasticsearch's APIs, ES Kit's [Api](docs/api/README.md) re
 
 ES Kit is designed to be used as a kit of parts; there are helper functions to handle each stage of the request / response lifecycle.
 
-You can create [scripts](docs/utilities/scripts.md) on the fly or pick from ES Kit's library (making [Painless](https://www.elastic.co/guide/en/elasticsearch/painless/master/index.html) relatively pain-free!):
+You can create [scripts](docs/utilities/scripts.md) on the fly or pick from ES Kit's [library](src/scripts) (making [Painless](https://www.elastic.co/guide/en/elasticsearch/painless/master/index.html) relatively pain-free!):
 
 ```js
 const script = $.script(function (ctx, params) { ... }, { lists: 'sales' })
 ```
 
-You can build [request options](docs/utilities/helpers.md#requests) passing `query`, `script`, and  ` sort` options to the native client as you would normally:
+You can build request parameters passing [query](docs/utilities/helpers.md#query), [script](docs/utilities/helpers.md#script), and [sort](docs/utilities/helpers.md#sort) options to the native client as you would normally:
 
 ```js
 const res = client.updateByQuery({ index: 'contacts', query, script, sort })
 ```
 
-Or parse [response data](docs/utilities/helpers.md#responses) without writing lots of call-specific code:
+Then [paginate](docs/utilities/helpers.md#paginate), [extract](docs/utilities/helpers.md#extract) or build [docs](docs/utilities/helpers.md#doc) without writing lots of call-specific code:
 
 ```js
 return $.paginate(res, options)

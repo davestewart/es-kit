@@ -4,10 +4,10 @@
 
 ## Preamble
 
-Docs are fine, but the best way to learn ES Kit is to: 
+ES Kit is prerelease, so: 
 
-- look at the [code](../src/modules) to see how it works
-- look at the [tests](../tests) to see a variety of examples
+- check the [code](../src/modules) to see how it works
+- check the [tests](../tests) to see some example usage
 
 ES Kit is not that complicated; it's just atomic, organised and logical.
 

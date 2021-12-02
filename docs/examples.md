@@ -1,5 +1,7 @@
 # Examples
 
+The following examples show you how to use a little, a lot or all of ES Kit to simplify your Elasticsearch code.
+
 ## Setup
 
 Set up ES JS Client:
@@ -13,7 +15,7 @@ export const client = new Client({
 })
 ```
 
-## Without ES Kit
+## No ES Kit
 
 To start with, let's write some ES queries using only the ES JS client:
 
@@ -48,17 +50,18 @@ const params = {
 try {
   const res = await client.search(params)
   if (res.body.hits) {
-	  return res.body.hits.hits.map(hit => {
+    return res.body.hits.hits.map(hit => {
       return { _id: hit._id, ...hit._source }
     })    
   }
 }
 catch (err) {
   console.log(err)
+  throw err
 }
 ```
 
-## Building query options
+## Simplify query building
 
 Now, let's bring in ES Kit's [query](./utilities/queries.md) functions to simplify the building of queries:
 
@@ -66,7 +69,7 @@ Now, let's bring in ES Kit's [query](./utilities/queries.md) functions to simpli
 import { client } from './client'
 import { Queries as _ } from '@davestewart/es-kit'
 
-// use blocks to build the query
+// use helpers to build the query
 const params = {
   index: 'contacts',
   query: _.should([
@@ -78,17 +81,18 @@ const params = {
 try {
   const res = await client.search(params)
   if (res.body.hits) {
-	  return res.body.hits.hits.map(hit => {
+    return res.body.hits.hits.map(hit => {
       return { _id: hit._id, ...hit._source }
     })    
   }
 }
 catch (err) {
   console.log(err)
+  throw err
 }
 ```
 
-## Handling API responses
+## Handle responses and errors
 
 Next, let's use ES Kit's [results](utilities/helpers.md) and [error](utilities/helpers.md) helpers to parse results and handle errors, without writing manual code:
 
@@ -105,33 +109,28 @@ const params = {
 }
 try {
   const res = await client.search(params)
-  return $.results(res)
+  return $.results(res) // convert results to something usable
 }
 catch (err) {
-  return $.error(err)
+  throw $.error(err) // logs and throws a simplified error structure
 }
 ```
 
-## Putting it all together
+## Go all-in
 
-Finally, lets use ES Kit's [API](./api) to make the call, parse responses, handle errors and remap fields (note: internally it uses all the available helpers!):
+Finally, lets use ES Kit's [API](./api) to make the call, parse responses and handle errors (note: internally it uses the helpers!):
 
 ```js
 import { client } from './client'
 import { Queries as _, Api } from '@davestewart/es-kit'
 
-const params = {
+// use the Api class to do everything above
+return Api.search('contacts', {
   query: _.should([
     _.match('groups', req.params.id),
     _.multiMatch('*', req.query.filter),
   ])
-}
-const options = {
-  _fields: { code: 'id', label: 'name', desc: 'description' }
-}
-
-// makes the call
-return Api.search('contacts', params, options)
+})
 ```
 
 ## Next
