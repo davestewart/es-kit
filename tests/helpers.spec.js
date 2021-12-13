@@ -1,5 +1,9 @@
 const { Scripts, Helpers } = require('../dist')
 
+// ---------------------------------------------------------------------------------------------------------------------
+// script
+// ---------------------------------------------------------------------------------------------------------------------
+
 function test (ctx, params) {
   const target = ctx._source[params.name]
   for (let i = 0; i < 1000; i++) {
@@ -53,6 +57,10 @@ describe('scripts', function () {
   })
 })
 
+// ---------------------------------------------------------------------------------------------------------------------
+// sort
+// ---------------------------------------------------------------------------------------------------------------------
+
 describe('sort', function () {
   it('should handle strings', function () {
     const received = Helpers.sort('name')
@@ -73,6 +81,10 @@ describe('sort', function () {
   })
 })
 
+// ---------------------------------------------------------------------------------------------------------------------
+// query
+// ---------------------------------------------------------------------------------------------------------------------
+
 describe('query', function () {
   const params = {
     name: 'dave',
@@ -88,6 +100,16 @@ describe('query', function () {
     { term: { name: { value: 'dave' } } },
     { term: { age: { value: 5 } } },
   ]
+
+  it('should default to a "must/match" query', function () {
+    const received = Helpers.query(params)
+    const expected = {
+      bool: {
+        must: matches,
+      },
+    }
+    expect(received).toEqual(expected)
+  })
 
   it('should create a "must/match" query', function () {
     const received = Helpers.query(params, { type: 'and', exact: false })
@@ -173,6 +195,10 @@ describe('query', function () {
     expect(received).toEqual(expected)
   })
 })
+
+// ---------------------------------------------------------------------------------------------------------------------
+// extract
+// ---------------------------------------------------------------------------------------------------------------------
 
 describe('extract', function () {
   const hits = [

@@ -24,9 +24,9 @@ export function $query (fields: Record<string, any>, options: { type?: 'and' | '
   }
 
   // functions
-  const bool = options.type === 'and'
-    ? _.must
-    : _.should
+  const bool = options.type === 'or'
+    ? _.should
+    : _.must
   const match = options.exact
     ? _.term
     : _.matchPhrasePrefix
