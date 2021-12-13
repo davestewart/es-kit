@@ -33,12 +33,11 @@ ES Kit works on the basis that Document and Search API calls **follow a similar 
 
 ### Purpose and customisation
 
-A few notes about customisation:
+You can use the helpers directly or indirectly via the [Api](../api/README.md) class (which uses them [internally](../../src/modules/api.ts)).
 
-- the [code](../../src/modules/helpers.ts) for each of the helpers is simple and straightforward
-- The helpers are **atomic** which means you can [replace](#extending) them if you need to
-- the  [Api](../api/README.md) class uses the helpers internally; if you make any changes, they will be reflected in all API calls
-- if you don't want to get into replacing the helpers, simply use your own code where it is more suitable to
+You should know that the [code](../../src/modules/helpers.ts) for each of the helpers is simple and straightforward but also make decisions on how to convert arguments into request parameters or response data. However, the helpers are designed to be **atomic** which means you can [replace](#extending) them if you need to, which will update the functionality of both the individual helper and the Api method which uses them.
+
+If you're not using the Api and you don't want to replace them, simply use your own code where you need to.
 
 ## Usage
 
@@ -87,16 +86,26 @@ The [query](../../src/modules/helpers.ts#) helper is designed to convert a hash 
 ```js
 function $query (
   fields: Record<string, any>,
-  options: { type?: 'and' | 'or', exact?: boolean } = {}
+  options: { type: 'and' | 'or' = 'and', exact: boolean = false } = {}
 ): BooleanQuery | Query
 ```
 
 It handles:
 
-- and / or
-- exact / fuzzy
-- multimatch
-- wildcards
+- and / or (must / should)
+- phrase / exact (match / term)
+- multimatch (pass `*` as field name)
+- wildcards (pass `*` as field value)
+
+### Request
+
+The [request](../../src/modules/helpers.ts#) helper is built on top of the Queru helper to directly convert a URLRequest's `params` and `query` values into a sensible compound Elastic query.
+
+```js
+function $request (
+  request: URLRequest
+): BooleanQuery | Query
+```
 
 ### Script
 
@@ -308,5 +317,5 @@ Helpers.doc = function (hit, source) {
 }
 ```
 
-> Note that extending `Helpers` will not overwrite the "individual" `$` style helpers, as decribed above.
+> Note that extending `Helpers` will not overwrite the individual exported `$` style helpers, as decribed above.
 

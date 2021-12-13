@@ -59,6 +59,13 @@ export function $query (fields: Record<string, any>, options: { type?: 'and' | '
 }
 
 /**
+ * Helper to build a query based on the request
+ */
+$query.request = function (req: { params?: Record<string, any>, query?: Record<string, any> }): BooleanQuery | Query {
+  return $query({ ...req.params, ...req.query })
+}
+
+/**
  * Helper to build a script object from a string or JavaScript function
  */
 export function $script (source: Function | string, params?: Record<string, any>) {
